@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gudang · Inventory Control QR</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <span class="brand-mark">◧</span>
+      <div class="brand-text">
+        <strong>Gudang</strong>
+        <small>Inventory Control</small>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <button class="nav-item is-active" data-view="dashboard">
+        <span class="nav-ico">⌂</span> Dashboard
+      </button>
+      <button class="nav-item" data-view="tambah">
+        <span class="nav-ico">＋</span> Tambah Item
+      </button>
+      <button class="nav-item" data-view="cek">
+        <span class="nav-ico">▤</span> Cek Item
+      </button>
+      <button class="nav-item" data-view="daftar">
+        <span class="nav-ico">≣</span> Daftar Item
+      </button>
+      <button class="nav-item" data-view="log">
+        <span class="nav-ico">◷</span> Log Aktivitas
+      </button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="conn-status" id="connStatus">
+        <span class="dot"></span> <span id="connStatusText">Memeriksa koneksi…</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- mobile top bar -->
+  <header class="mobile-bar">
+    <button id="menuBtn" class="menu-btn" aria-label="Buka menu">☰</button>
+    <div class="mobile-brand"><span class="brand-mark">◧</span> Gudang</div>
+  </header>
+
+  <!-- ===================== MAIN ===================== -->
+  <main class="main">
+
+    <!-- ---------- DASHBOARD ---------- -->
+    <section class="view is-active" id="view-dashboard">
+      <div class="view-head">
+        <h1>Ringkasan Gudang</h1>
+        <p>Pantauan cepat kondisi inventaris dan aktivitas terbaru.</p>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <span class="stat-num" id="statTotalItem">–</span>
+          <span class="stat-label">Total item</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num" id="statTotalLokasi">–</span>
+          <span class="stat-label">Lokasi terpakai</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num" id="statTotalStok">–</span>
+          <span class="stat-label">Total stok (unit)</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num" id="statEditHariIni">–</span>
+          <span class="stat-label">Perubahan hari ini</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Aktivitas terbaru</h2>
+          <button class="btn-text" data-view-link="log">Lihat semua log</button>
+        </div>
+        <ul class="activity-list" id="dashboardActivity">
+          <li class="empty-row">Memuat aktivitas…</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ---------- TAMBAH ITEM ---------- -->
+    <section class="view" id="view-tambah">
+      <div class="view-head">
+        <h1>Tambah item</h1>
+        <p>Daftarkan item baru beserta lokasi itemnya. Kode QR dibuat otomatis.</p>
+      </div>
+
+      <div class="grid-2">
+        <form class="panel form" id="formTambah">
+          <label class="field">
+            <span>Nama item</span>
+            <input type="text" id="inputNama" placeholder="Contoh: Obeng Plus 6mm" required>
+          </label>
+          <label class="field">
+            <span>Lokasi item</span>
+            <input type="text" id="inputLokasi" placeholder="Contoh: Rak A3 - Lantai 2" required>
+          </label>
+          <div class="field-row">
+            <label class="field">
+              <span>Jumlah</span>
+              <input type="number" id="inputJumlah" min="0" value="1">
+            </label>
+            <label class="field">
+              <span>Kategori <em>(opsional)</em></span>
+              <input type="text" id="inputKategori" placeholder="Contoh: Perkakas">
+            </label>
+          </div>
+          <button type="submit" class="btn-primary" id="btnSubmitTambah">Simpan item</button>
+          <p class="form-msg" id="tambahMsg"></p>
+        </form>
+
+        <div class="panel qr-result" id="qrResultPanel">
+          <div class="qr-placeholder" id="qrPlaceholder">
+            <span class="qr-placeholder-ico">▤</span>
+            <p>Kode QR item baru akan tampil di sini setelah disimpan — siap dicetak dan ditempel di lokasi barang.</p>
+          </div>
+          <div class="qr-generated" id="qrGenerated" hidden>
+            <div id="qrCanvas" class="qr-canvas"></div>
+            <div class="qr-meta">
+              <strong id="qrItemNama">—</strong>
+              <span id="qrItemLokasi">—</span>
+              <code id="qrItemId">—</code>
+            </div>
+            <div class="qr-actions">
+              <button class="btn-secondary" id="btnDownloadQr">Unduh QR</button>
+              <button class="btn-secondary" id="btnPrintQr">Cetak label</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- CEK ITEM ---------- -->
+    <section class="view" id="view-cek">
+      <div class="view-head">
+        <h1>Cek item</h1>
+        <p>Pindai kode QR untuk memverifikasi item dan lokasinya secara instan.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel scan-panel">
+          <div class="scan-tabs">
+            <button class="scan-tab is-active" data-mode="camera">Pindai kamera</button>
+            <button class="scan-tab" data-mode="manual">Input manual</button>
+          </div>
+
+          <div class="scan-mode" id="mode-camera">
+            <div id="qrReader" class="qr-reader"></div>
+            <button class="btn-secondary" id="btnToggleCam">Aktifkan kamera</button>
+            <p class="hint">Izinkan akses kamera, lalu arahkan ke kode QR pada label item.</p>
+          </div>
+
+          <div class="scan-mode" id="mode-manual" hidden>
+            <label class="field">
+              <span>ID item / kode QR</span>
+              <input type="text" id="inputManualCode" placeholder="Contoh: INV-2609161234567">
+            </label>
+            <button class="btn-primary" id="btnCekManual">Cek item</button>
+          </div>
+          <p class="form-msg" id="cekMsg"></p>
+        </div>
+
+        <div class="panel item-result" id="itemResultPanel">
+          <div class="item-result-empty" id="itemResultEmpty">
+            <span class="qr-placeholder-ico">▤</span>
+            <p>Hasil pengecekan item akan tampil di sini.</p>
+          </div>
+          <div class="item-result-data" id="itemResultData" hidden>
+            <div class="item-result-top">
+              <h3 id="resNama">—</h3>
+              <code id="resId">—</code>
+            </div>
+            <dl class="item-detail-list">
+              <div><dt>Lokasi</dt><dd id="resLokasi">—</dd></div>
+              <div><dt>Jumlah</dt><dd id="resJumlah">—</dd></div>
+              <div><dt>Kategori</dt><dd id="resKategori">—</dd></div>
+              <div><dt>Dibuat</dt><dd id="resDibuat">—</dd></div>
+              <div><dt>Terakhir diedit</dt><dd id="resDiedit">—</dd></div>
+            </dl>
+            <button class="btn-secondary" id="btnEditFromCek">Edit item ini</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- DAFTAR ITEM ---------- -->
+    <section class="view" id="view-daftar">
+      <div class="view-head view-head-row">
+        <div>
+          <h1>Daftar item</h1>
+          <p>Semua item tersimpan di Google Sheet. Klik salah satu untuk mengedit.</p>
+        </div>
+        <label class="field search-field">
+          <span>Cari</span>
+          <input type="text" id="searchItem" placeholder="Cari nama, lokasi, atau ID…">
+        </label>
+      </div>
+
+      <div class="panel">
+        <div class="table-wrap">
+          <table class="item-table">
+            <thead>
+              <tr>
+                <th>Nama item</th>
+                <th>Lokasi</th>
+                <th>Jumlah</th>
+                <th>Kategori</th>
+                <th>Terakhir diedit</th>
+              </tr>
+            </thead>
+            <tbody id="itemTableBody">
+              <tr><td colspan="5" class="empty-row">Memuat data…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- LOG AKTIVITAS ---------- -->
+    <section class="view" id="view-log">
+      <div class="view-head view-head-row">
+        <div>
+          <h1>Log aktivitas</h1>
+          <p>Riwayat penambahan &amp; pengeditan, tersimpan otomatis di Google Docs.</p>
+        </div>
+        <button class="btn-secondary" id="btnRefreshLog">Muat ulang</button>
+      </div>
+
+      <div class="panel">
+        <ul class="activity-list activity-list--full" id="logList">
+          <li class="empty-row">Memuat log…</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===================== MODAL EDIT ===================== -->
+<div class="modal-overlay" id="editModalOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modal-head">
+      <h3 id="editModalTitle">Edit item</h3>
+      <button class="modal-close" id="closeEditModal" aria-label="Tutup">×</button>
+    </div>
+    <form id="formEdit">
+      <input type="hidden" id="editId">
+      <label class="field">
+        <span>Nama item</span>
+        <input type="text" id="editNama" required>
+      </label>
+      <label class="field">
+        <span>Lokasi item</span>
+        <input type="text" id="editLokasi" required>
+      </label>
+      <div class="field-row">
+        <label class="field">
+          <span>Jumlah</span>
+          <input type="number" id="editJumlah" min="0">
+        </label>
+        <label class="field">
+          <span>Kategori</span>
+          <input type="text" id="editKategori">
+        </label>
+      </div>
+      <p class="form-msg" id="editMsg"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="cancelEdit">Batal</button>
+        <button type="submit" class="btn-primary" id="btnSaveEdit">Simpan perubahan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
